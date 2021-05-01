@@ -1,0 +1,9 @@
+{
+    "title": "Sobre",
+    "txt1": "Esse é o meu currículo!",
+    "txt2": "teste teste teste",
+    "style": {
+        "backgroundColor": "green",
+        "color:": "white"
+    }
+}
