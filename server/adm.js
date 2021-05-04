@@ -6,6 +6,7 @@ const path = require('path');
 var zipper = require('zip-local');
 const Jimp = require('jimp');
 const fse = require('fs-extra')
+const webp=require('webp-converter');
 
 
 
@@ -14,18 +15,35 @@ console.log('myArgs: ', myArgs);
 
 var target = path.join(__dirname) + '/../client/src/assets/'
 
-async function scaleToFitBatch(siteName, directoryPath, files, cb) {
+async function scaleToFitBatch(siteName, directoryPath, cb) {
     // Read the image.
     console.log(siteName, directoryPath, files, cb);
+    
+     //Conver image file webp to jpeg
+     files = fs.readdirSync(directoryPath)
+     var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
+     files.forEach(async function (file, i) {
+         file_ = directoryPath + '/' + file
+         if (file_.split('.')[1].toLowerCase() == 'webp'){
+             console.log(file_, directoryPath + '/' + file.split('.')[0].toLowerCase() + '.jpg');
+             const result = webp.dwebp(file_, directoryPath + '/' + file.split('.')[0].toLowerCase() + '.jpg',"-o",logging="-v");
+                 result.then((response) => {
+                 console.log(response);
+             });
+         }
+     });
+     
+    files = fs.readdirSync(directoryPath)
+    var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
     files.forEach(async function (file, i, array) {
-        if (file.split('.')[1]!=='zip'){
+        if (file.split('.')[1]!=='zip' &&  file.split('.')[1]!=='webp'){
             const buffer = fs.readFileSync(directoryPath + '/' + file);
             const image = await Jimp.read(buffer);
             console.log(file)
             await image.scaleToFit(1100, 900)
             // Save and overwrite the image
-            console.log(`to: ./${siteName}/img/portfolio/${i}.jpg`);
-            await image.write(`./${siteName}/img/portfolio/${i}.jpg`);
+            console.log(`to: ${siteName}/img/portfolio/${i}.jpg`);
+            await image.write(`${siteName}/img/portfolio/${i}.jpg`);
             // if (newName == total) {console.log('fim!!!')}
         }
 
@@ -36,38 +54,36 @@ async function scaleToFitBatch(siteName, directoryPath, files, cb) {
         
     })
 }
-// const cleanUpDir = (dir) => {
-//     fs.readdir(dir, (err, files) => {
-//         if (err) throw err;
-//         for (const file of files) {
-//           fs.unlink(path.join(dir, file), err => {
-//             if (err) throw err;
-//           });
-//         }
-//       });
-// }
-const portfolio_get_files = (siteName, directoryPath, cb) => {
+
+const site_new_scaffold = (siteName) => {
+    // Delete if exists
     
+    if (fs.existsSync(`${siteName}`)) {
+        console.log(`Deleting: ${siteName}`);
+        fs.rmdirSync(`${siteName}`, { recursive: true })
+    }
     // Copy site skeleton
     try {
-        console.log(`Build dir: ./${siteName}`);
-        if (fs.existsSync(`./${siteName}`)) {
-            console.log(`Deleting: ./${siteName}`);
-            fs.rmdirSync(`./${siteName}`, { recursive: true })
-        }
-        fse.copySync('./site', `./${siteName}`)
+        fse.copySync('./sites/skeleton', `${siteName}`)
+        console.log(`Build dir: ${siteName}`);
         console.log('success!')
     } catch (err) {
         console.error(err)
     }
+}
 
-    console.log(siteName, directoryPath, cb);
-    //Clean up dir
-    // cleanUpDir(`./${siteName}/img/portfolio`)
+const portfolio_get_files = (siteName, directoryPath, cb) => {
+    if (fs.existsSync(`${siteName}`)) {
+        console.log(siteName, directoryPath, cb);
+        // files = fs.readdirSync(directoryPath)
+        // var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
 
-    files = fs.readdirSync(directoryPath)
-    var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
-    scaleToFitBatch(siteName, directoryPath, files, cb)
+       
+
+        scaleToFitBatch(siteName, directoryPath, cb)
+    }else{
+        console.log(`site: ${siteName} ainda não existe`);
+    }
 }
 
 async function scaleToFit(file, newName, total) {
@@ -84,7 +100,7 @@ async function scaleToFit(file, newName, total) {
 }
 
 const site_zip = (file) => {
-    zipper.sync.zip('./'+file).compress().save(file+'.zip');
+    zipper.sync.zip(file).compress().save(file+'.zip');
    
 } 
 
@@ -120,8 +136,8 @@ async function unzip (file, target) {
 }
 
 const portfolio_build_script = (siteName) => {
-    const directoryPath = `./${siteName}/img/portfolio/`
-    var data_portfolio = `./${siteName}/data/portfolio.json`
+    const directoryPath = `${siteName}/img/portfolio/`
+    var data_portfolio = `${siteName}/data/portfolio.json`
     var txt = ""
     let dataFileLines = []
     fs.readdir(directoryPath, function (err, files) {
@@ -164,25 +180,24 @@ const cleanUpDir = (directory) => {
     }
 }
 
-if (myArgs[0] == "portfolio_pack"){
-    portfolio_get_files(myArgs[1], myArgs[2], portfolio_build_script)
+const cmd = myArgs[0]
+const site = './sites/' + myArgs[1]
+const from = myArgs[2]
+
+if (cmd == "init"){
+    site_new_scaffold(site)
 }
 
-if (myArgs[0] == "zip"){
-    site_zip(myArgs[1], myArgs[2])
+if (cmd == "portfolio_pack"){
+    portfolio_get_files(site, from, portfolio_build_script)
 }
 
-if (myArgs[0] == "upload"){
-    console.log('./' + myArgs[1] + '.zip');
-    site_upload('./' + myArgs[1] + '.zip')
+if (cmd == "zip"){
+    site_zip(site, from)
 }
 
-
-
+if (cmd == "upload"){
+    console.log( site + '.zip');
+    site_upload( site + '.zip')
+}
 console.log("----");
-// zip('./pack_portfolio')
-  
-
-// zip('./pack_portfolio')
-// cleanUpDir(target)
-// upload('pack.zip', target)
