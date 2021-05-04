@@ -1,0 +1,14 @@
+{
+    "logo": {
+        "txt":"Novo site teste!!"
+    },
+    "menu": {
+        "portfolio": "Portfolio",
+        "about": "Sobre",
+        "contact": "Contato"
+    },
+    "style": {
+        "backgroundColor": "blue",
+        "color": "white"
+    }
+}

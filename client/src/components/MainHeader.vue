@@ -2,7 +2,7 @@
     <header class="masthead bg-primary text-white text-center">
       <div class="container d-flex align-items-center flex-column">
           <!-- Masthead Avatar Image-->
-          <img v-if=avatar class="masthead-avatar mb-5" :src="require('../assets/img/' + avatar)" alt="" />
+          <img v-if=avatar class="masthead-avatar mb-5" :src="require(`../assets/${site}/img/${avatar}`)" alt="" />
           <!-- Masthead Heading-->
           <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
 
@@ -26,6 +26,16 @@ export default {
     avatar: String,
     txt1: String,
     txt2: String
+  },
+  setup(){
+     let site = window.location.href.split('/').pop()
+  //   const getImgUrl = (pic) => {
+  //     return require(pic)
+  //   }
+  
+    return {
+      site
+    }
   }
 }
 </script>

@@ -1,0 +1,14 @@
+{
+    "logo": {
+        "txt":"teste221"
+    },
+    "menu": {
+        "portfolio": "Portfolio",
+        "about": "Sobre",
+        "contact": "Contato"
+    },
+    "style": {
+        "backgroundColor": "blue",
+        "color": "white"
+    }
+}
