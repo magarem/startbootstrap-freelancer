@@ -8,51 +8,52 @@ const Jimp = require('jimp');
 const fse = require('fs-extra')
 const webp=require('webp-converter');
 
-
-
 var myArgs = process.argv.slice(2);
 console.log('myArgs: ', myArgs);
 
 var target = path.join(__dirname) + '/../client/src/assets/'
 
-async function scaleToFitBatch(siteName, directoryPath, cb) {
+
+async function scaleToFitBatch(siteName, directoryPath) {
+//   new Promise((resolve) => {
     // Read the image.
-    console.log(siteName, directoryPath, files, cb);
+    console.log(siteName, directoryPath, files);
     
-     //Conver image file webp to jpeg
-     files = fs.readdirSync(directoryPath)
-     var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
-     files.forEach(async function (file, i) {
-         file_ = directoryPath + '/' + file
-         if (file_.split('.')[1].toLowerCase() == 'webp'){
-             console.log(file_, directoryPath + '/' + file.split('.')[0].toLowerCase() + '.jpg');
-             const result = webp.dwebp(file_, directoryPath + '/' + file.split('.')[0].toLowerCase() + '.jpg',"-o",logging="-v");
-                 result.then((response) => {
-                 console.log(response);
-             });
-         }
-     });
+    //Convert image file webp to jpeg
+    //  files = fs.readdirSync(directoryPath)
+    //  var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
+    //  files.forEach(async function (file, i) {
+    //      file_ = directoryPath + '/' + file
+    //      if (file_.split('.')[1].toLowerCase() == 'webp'){
+    //          console.log(file_, directoryPath + '/' + file.split('.')[0].toLowerCase() + '.jpg');
+    //          const result = webp.dwebp(file_, directoryPath + '/' + file.split('.')[0].toLowerCase() + '.jpg',"-o",logging="-v");
+    //              result.then((response) => {
+    //              console.log(response);
+    //          });
+    //      }
+    //  });
      
     files = fs.readdirSync(directoryPath)
     var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
-    files.forEach(async function (file, i, array) {
-        if (file.split('.')[1]!=='zip' &&  file.split('.')[1]!=='webp'){
-            const buffer = fs.readFileSync(directoryPath + '/' + file);
-            const image = await Jimp.read(buffer);
-            console.log(file)
-            await image.scaleToFit(1100, 900)
-            // Save and overwrite the image
-            console.log(`to: ${siteName}/img/portfolio/${i}.jpg`);
-            await image.write(`${siteName}/img/portfolio/${i}.jpg`);
-            // if (newName == total) {console.log('fim!!!')}
-        }
+    var i=0
+    for ( const file of files ) {
+        const image = await Jimp.read(directoryPath + '/' + file);
+        console.log(file)
+        await image.scaleToFit(1100, 900)
+        // Save and overwrite the image
+        console.log(`to: ${siteName}/img/portfolio/${i}.jpg`);
+        await image.writeAsync(`${siteName}/img/portfolio/${i}.jpg`);
+        i++
+    }
+}
 
-        if (i === array.length-1){ 
-            console.log('terminou');
-            setTimeout(function(){cb(siteName)}, 3000);
-        }
-        
-    })
+async function avatarImgUpdate(siteName, directoryPath) {
+    files = fs.readdirSync(directoryPath)
+    var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
+    const image = await Jimp.read(directoryPath + '/' + files[0]);
+    await image.scaleToFit(300, 300)
+    console.log(`to: ${siteName}/img/avatar.jpg`);
+    await image.writeAsync(`${siteName}/img/avatar.jpg`);
 }
 
 const site_new_scaffold = (siteName) => {
@@ -70,33 +71,6 @@ const site_new_scaffold = (siteName) => {
     } catch (err) {
         console.error(err)
     }
-}
-
-const portfolio_get_files = (siteName, directoryPath, cb) => {
-    if (fs.existsSync(`${siteName}`)) {
-        console.log(siteName, directoryPath, cb);
-        // files = fs.readdirSync(directoryPath)
-        // var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
-
-       
-
-        scaleToFitBatch(siteName, directoryPath, cb)
-    }else{
-        console.log(`site: ${siteName} ainda não existe`);
-    }
-}
-
-async function scaleToFit(file, newName, total) {
-    // Read the image.
-    const buffer = fs.readFileSync(file);
-    const image = await Jimp.read(buffer);
-    console.log(newName, image.bitmap.width)
-    
-    await image.scaleToFit(1100, 900)
-    // Save and overwrite the image
-    await image.write(`pack_portfolio/${newName}.jpg`);
-    // if (newName == total) {console.log('fim!!!')}
-    return newName
 }
 
 const site_zip = (file) => {
@@ -124,15 +98,23 @@ const site_upload = (file) => {
     form.pipe(req);
 }
 
-async function unzip (file, target) {
-    try {
-      await extract(target + file, { dir: target})
-      console.log('Extraction complete')
-      buildPortfolioScript()
-    } catch (err) {
-        console.log(err);
-      // handle any errors
-    }
+const updateSiteData_navbar = (siteName) => {
+    var sitePath = `${siteName}/data/navbar.json`
+    // read file and make object
+    let content = JSON.parse(fs.readFileSync(sitePath, 'utf8'));
+    // edit or add property
+    content.logo.txt = siteName.split('/').pop();
+    //write file
+    fs.writeFileSync(sitePath, JSON.stringify(content));
+}
+const updateSiteData_mainHeader = (siteName, avatarFileName) => {
+    var sitePath = `${siteName}/data/mainheader.json`
+    // read file and make object
+    let content = JSON.parse(fs.readFileSync(sitePath, 'utf8'));
+    // edit or add property
+    content.avatar = avatarFileName;
+    //write file
+    fs.writeFileSync(sitePath, JSON.stringify(content));
 }
 
 const portfolio_build_script = (siteName) => {
@@ -140,60 +122,128 @@ const portfolio_build_script = (siteName) => {
     var data_portfolio = `${siteName}/data/portfolio.json`
     var txt = ""
     let dataFileLines = []
-    fs.readdir(directoryPath, function (err, files) {
-        //handling error
-        if (err) {
-            return console.log('Unable to scan directory: ' + err);
-        } 
-        //listing all files using forEach
-        var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
-        files.forEach(function (file, i) {
-            if (file.split('.')[1]!=='zip'){
-                // Do whatever you want to do with the file
-                obj = `{
-                    "order": ${i},
-                    "img": "${file}",
-                    "title": "Foto ${i+1}",
-                    "body": "Foto ${i+1}"
-                }`
-                dataFileLines.push(obj)
-            }
-        });
-        txt = '{"title":"Portfolio", "items": ['+dataFileLines.join(',')+']}'
-        console.log(txt);
-        fs.writeFileSync(data_portfolio, txt);
 
-        
-    });
-}
-
-const cleanUpDir = (directory) => {
-    if (fs.existsSync(directory)) {
-        fs.readdir(directory, (err, files) => {
-            if (err) throw err;
-            for (const file of files) {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        });
+    var files = fs.readdirSync(directoryPath)
+    files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
+    var i=0
+    for ( const file of files ) {
+        if (file.split('.')[1]!=='zip'){
+            // Do whatever you want to do with the file
+            obj = `{
+                "order": ${i},
+                "img": "${file}",
+                "title": "Foto ${i+1}",
+                "body": "Foto ${i+1}"
+            }`
+            dataFileLines.push(obj)
+        }
+        i++
     }
+    txt = '{"title":"Portfolio", "items": ['+dataFileLines.join(',')+']}'
+    console.log(txt);
+    fs.writeFileSync(data_portfolio, txt);   
+
+    // fs.readdir(directoryPath, function (err, files) {
+    //     //handling error
+    //     if (err) {
+    //         return console.log('Unable to scan directory: ' + err);
+    //     } 
+    //     //listing all files using forEach
+    //     var files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
+    //     files.forEach(function (file, i) {
+    //         if (file.split('.')[1]!=='zip'){
+    //             // Do whatever you want to do with the file
+    //             obj = `{
+    //                 "order": ${i},
+    //                 "img": "${file}",
+    //                 "title": "Foto ${i+1}",
+    //                 "body": "Foto ${i+1}"
+    //             }`
+    //             dataFileLines.push(obj)
+    //         }
+    //     });
+    //     txt = '{"title":"Portfolio", "items": ['+dataFileLines.join(',')+']}'
+    //     console.log(txt);
+    //     fs.writeFileSync(data_portfolio, txt);     
+    // });
 }
+
 
 const cmd = myArgs[0]
 const site = './sites/' + myArgs[1]
 const from = myArgs[2]
+
+async function main (site, from){
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: Iniciando montagem do site...`);
+    console.log(`-----------------------------------------`);
+    site_new_scaffold(site)
+    
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: navbar: Editado dados...`);
+    console.log(`-----------------------------------------`);
+    updateSiteData_navbar(site)
+
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: mainheader: Atualizando imagem do avatar...`);
+    console.log(`-----------------------------------------`);
+    avatarImgUpdate(site, from)
+
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: mainheader: Atualizando script...`);
+    console.log(`-----------------------------------------`);
+    updateSiteData_mainHeader(site, 'avatar.jpg')
+    
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: Iniciando cópia das imagens de (${from})...`)
+    console.log(`-----------------------------------------`);
+    await scaleToFitBatch(site, from)
+
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: montando script do portfolio...`)
+    console.log(`-----------------------------------------`);
+    await portfolio_build_script(site)
+
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: Iniciando compactação do pacote...`)
+    console.log(`-----------------------------------------`);
+    site_zip(site)
+
+    console.log(`-----------------------------------------`);
+    console.log(`${site}: Iniciando envio do pacote para o servidor...`)
+    console.log(`-----------------------------------------`);
+    site_upload( site + '.zip')
+}
+
+async function update (site){
+    console.log(`-----------------------------------------`);
+    console.log(`Iniciando compactação do pacote...`)
+    console.log(`-----------------------------------------`);
+    site_zip(site)
+
+    console.log(`-----------------------------------------`);
+    console.log(`Iniciando envio do pacote para o servidor...`)
+    console.log(`-----------------------------------------`);
+    site_upload( site + '.zip')
+}
+
+if (cmd == "new"){
+    main(site, from)
+}
+if (cmd == "update"){
+    update(site)
+}
 
 if (cmd == "init"){
     site_new_scaffold(site)
 }
 
 if (cmd == "portfolio_pack"){
-    portfolio_get_files(site, from, portfolio_build_script)
+    scaleToFitBatch(site, from, portfolio_build_script)
 }
 
 if (cmd == "zip"){
-    site_zip(site, from)
+    site_zip(site)
 }
 
 if (cmd == "upload"){
