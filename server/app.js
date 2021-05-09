@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express();
+// app.use(express.static('sites'));
+
 const port = 3000;
 const path = require('path');
 const fs = require('fs');
-// const uploadFile = require("./upload");
 var zipper = require('zip-local');
 const extract = require('extract-zip')
 
@@ -60,13 +61,11 @@ app.post('/upload_', async (req, res) => {
   }
 })
 
-app.get('/', (req,res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
-});
+
 
 app.get('/api/dataload/:site/:id', (req, res) => {
     console.log(req.params);
-    fs.readFile(`../client/src/assets/${req.params.site}/data/${req.params.id}.json`, {encoding: 'utf-8'}, function(err, data){
+    fs.readFile(`./sites/${req.params.site}/data/${req.params.id}.json`, {encoding: 'utf-8'}, function(err, data){
         if (!err) {
             dataFileObj = ""
             dataFileObj = JSON.parse(data)
@@ -79,5 +78,14 @@ app.get('/api/dataload/:site/:id', (req, res) => {
     
     }
 )
+
+app.use('/public', express.static('public'));
+app.use('/api/sites', express.static('sites'));
+
+app.get('/:site', (req,res) => {
+  // res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  console.log(__dirname);
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

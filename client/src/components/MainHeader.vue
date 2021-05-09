@@ -3,7 +3,7 @@
       <div class="container d-flex align-items-center flex-column">
           <!-- Masthead Avatar Image-->
           <!-- <div class="round"> -->
-            <img v-if=avatar class="masthead-avatar mb-5" style="border-radius: 50%" :src="require(`../assets/${site}/img/${avatar}`)" alt="" />
+            <img v-if=avatar class="masthead-avatar mb-5" style="border-radius: 50%" :src="`/api/sites/${site}/img/${avatar}`" alt="" />
           <!-- </div> -->
           <!-- Masthead Heading-->
           <!-- <img alt="Vue logo" src="../assets/logo.png"> -->

@@ -54,6 +54,7 @@ export default {
   },
   setup(){
     let site = window.location.href.split('/').pop()
+    console.log('site:', site);
     let data_items = ref({
       navbar: {},
       mainheader: {},
@@ -62,6 +63,8 @@ export default {
       contactme: {},
       footer: {}
     })
+
+    // console.log(data);
 
     async function readData(site, id) {
       const response = await fetch(`/api/dataload/${site}/${id}`);

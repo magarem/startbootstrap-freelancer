@@ -1,0 +1,19 @@
+{
+    "location": {
+        "title": "endereço",
+        "txt": "rua teste 22"
+    },
+    "midias":{
+        "title": "social midias",
+        "links": {
+            "facebook": "marcelo.magalhaes",
+            "instagram": "@riozencaraiva",
+            "linkdin": "maguete"
+        }
+    },
+    "resume":{
+        "title": "sobre",
+        "txt": "Bem vindo!"
+    },
+    "copyright": "Magaweb"
+}

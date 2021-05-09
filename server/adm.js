@@ -257,15 +257,15 @@ async function main (site, from){
     console.log(`-----------------------------------------`);
     await portfolio_build_script(site)
 
-    console.log(`-----------------------------------------`);
-    console.log(`${site}: Iniciando compactação do pacote...`)
-    console.log(`-----------------------------------------`);
-    site_zip(site)
+    // console.log(`-----------------------------------------`);
+    // console.log(`${site}: Iniciando compactação do pacote...`)
+    // console.log(`-----------------------------------------`);
+    // site_zip(site)
 
-    console.log(`-----------------------------------------`);
-    console.log(`${site}: Iniciando envio do pacote para o servidor...`)
-    console.log(`-----------------------------------------`);
-    site_upload( site + '.zip')
+    // console.log(`-----------------------------------------`);
+    // console.log(`${site}: Iniciando envio do pacote para o servidor...`)
+    // console.log(`-----------------------------------------`);
+    // site_upload( site + '.zip')
 }
 
 async function update (site){

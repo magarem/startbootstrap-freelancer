@@ -5,7 +5,7 @@
       <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
         <div class="portfolio-item-caption-content text-center text-white"><i class="fas fa-plus fa-3x"></i></div>
       </div>
-      <div class="with-bg-size img-fluid_" :style="{'background-image': 'url(' + require(`../assets/${site}/img/portfolio/${img}`)}"></div>
+      <div class="with-bg-size img-fluid_" :style="{'background-image': 'url' + `(/api/sites/${site}/img/portfolio/${img})`}"></div>
     </div>
   </div>
   <!-- Portfolio Modal -->
@@ -28,7 +28,8 @@
                   <div class="divider-custom-line"></div>
                 </div>
                 <!-- Portfolio Modal - Image-->
-                <img v-if="img" class="img-fluid rounded mb-5" :src="require(`../assets/${site}/img/portfolio/${img}`)" alt="" />
+                <img v-if="img" class="img-fluid rounded mb-5" :src="`/api/sites/${site}/img/portfolio/${img}`" alt="" />
+                <!-- <img v-if="img" class="img-fluid rounded mb-5" :src="img_" alt="" /> -->
                 <!-- Portfolio Modal - Text-->
                 <p class="mb-5">{{body}}</p>
                 <button class="btn btn-primary" data-dismiss="modal">
@@ -45,6 +46,7 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 export default {
   name: 'PortfolioItem',
   props: {
@@ -53,14 +55,17 @@ export default {
     title: String,
     body: String
   },
-  setup(){
+  setup(props){
      let site = window.location.href.split('/').pop()
-  //   const getImgUrl = (pic) => {
+    
+    console.log(`/api/sites/${site}/img/portfolio/${props.img}`);
+ //   const getImgUrl = (pic) => {
   //     return require(pic)
   //   }
-  
+    const img_ = ref('/sites/radha/img/avatar.jpg')
     return {
-      site
+      site,
+      img_
     }
   }
 }
